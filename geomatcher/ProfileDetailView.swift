@@ -5,55 +5,73 @@
 //  Created by Jiayi on 5/8/26.
 //
 
-//this is for when u click the small profile and it zooms with matched geometry to become something that fills up the screen
-
+// this is for when u click the small profile and it zooms with matched geometry to become something that fills up the screen
 
 import SwiftUI
-import SwiftData
 
 struct ProfileDetailView: View {
     let profile: Profile
-    var animation: Namespace.ID
-    var onClose: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                Image("bolognese")
-                    .scaledToFill()
-                    .matchedGeometryEffect(id: "image_\(profile.id)", in: animation)
-                    .frame(maxWidth: .infinity, maxHeight: 400)
-                    .clipped()
-                
+    let animation: Namespace.ID
+    let onClose: () -> Void
 
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
-                        .padding()
+    var body: some View {
+        NavigationStack {
+            VStack {
+                // Top image
+                ZStack(alignment: .topLeading) {
+                    Image(profile.picture)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(minWidth: 0, minHeight: 0)
+                        .aspectRatio(1, contentMode: .fit)
+                        .matchedGeometryEffect(
+                            id: "image_\(profile.id)",
+                            in: animation
+                        )
                 }
+                .toolbar {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("\(profile.name)")
+                        .font(.system(.largeTitle, design: .rounded))
+                        .bold()
+                        .matchedGeometryEffect(
+                            id: "text_\(profile.id)",
+                            in: animation
+                        )
+                        .fixedSize(horizontal: true, vertical: true)
+                    Text(profile.bio)
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(UIColor.systemBackground))
             }
-            
-            VStack(alignment: .leading, spacing: 12) {
-                Text("\(profile.name), \(profile.age)")
-                    .font(.largeTitle)
-                    .bold()
-                    .matchedGeometryEffect(id: "text_\(profile.id)", in: animation)
-                
-                Text(profile.bio)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(UIColor.systemBackground))
+            .matchedGeometryEffect(id: "card_\(profile.id)", in: animation)
+            .ignoresSafeArea()
         }
-        .matchedGeometryEffect(id: "card_\(profile.id)", in: animation)
-        .ignoresSafeArea()
-        .onTapGesture {
-            onClose()
+    }
+}
+
+// Provide a dummy namespace for previewing
+struct ProfileDetailPreview: PreviewProvider {
+    struct Container: View {
+        @Namespace var dummyNamespace
+        var body: some View {
+            ProfileDetailView(
+                profile: Profiles[1],
+                animation: dummyNamespace,
+                onClose: {}
+            )
         }
+    }
+    static var previews: some View {
+        Container()
     }
 }

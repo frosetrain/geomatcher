@@ -5,39 +5,87 @@
 //  Created by T Krobot on 1/8/26.
 //
 
-//this is for the individual person's icons/small photos for when you scroll the home page
+// this is for the individual person's icons/small photos for when you scroll the home page
 
 import SwiftUI
 
 struct ProfileCardView: View {
     let profile: Profile
-    var animation: Namespace.ID
-    
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            Image("bolognese")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 200)
-                .cornerRadius(16)
-            
+    let animation: Namespace.ID
 
-            
-            VStack(alignment: .leading) {
-                Text("\(profile.name), \(profile.age)")
-                    .font(.headline)
-                    .foregroundColor(.white)
+    var body: some View {
+        VStack(alignment: .center, spacing: -8) {
+            ZStack(alignment: .bottomLeading) {
+                Image(profile.picture)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(minWidth: 0, minHeight: 0)
+                    .aspectRatio(1, contentMode: .fit)
+                    .matchedGeometryEffect(
+                        id: "image_\(profile.id)",
+                        in: animation
+                    )
+                Rectangle()
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.clear, .black],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                    )
+                VStack(alignment: .leading) {
+                    Text("\(profile.name)")
+                        .font(.system(.title2, design: .rounded))
+                        .bold()
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: true, vertical: true)
+                }
+                .padding(12)
+                .matchedGeometryEffect(id: "text_\(profile.id)", in: animation)
             }
-            .padding(12)
-            .matchedGeometryEffect(id: "text_\(profile.id)", in: animation)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .padding(8)
+
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: "birthday.cake.fill")
+                    Text("\(profile.age)")
+                        .font(.callout)
+                        .bold()
+                }
+                Divider()
+                    .frame(height: 20)
+                    .padding(4)
+                HStack(spacing: 4) {
+                    Image(systemName: "heart.fill")
+                        .foregroundStyle(.red)
+                    Text("\(profile.followers)")
+                        .font(.callout)
+                        .bold()
+                }
+            }
+            .padding(8)
         }
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.15), radius: 6, x: 3, y: 3)
     }
 }
-#Preview {
-    ProfileCardView(profile: <#T##Profile#>, animation: <#T##Namespace.ID#>)
+
+// Provide a dummy namespace for previewing
+struct ProfileCardPreview: PreviewProvider {
+    struct Container: View {
+        @Namespace var dummyNamespace
+        var body: some View {
+            ProfileCardView(
+                profile: Profiles[3],
+                animation: dummyNamespace,
+            )
+            .frame(width: 200)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    static var previews: some View {
+        Container()
+    }
 }
-
-
-
-
-
