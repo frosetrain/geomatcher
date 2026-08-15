@@ -15,46 +15,51 @@ struct ProfileDetailView: View {
     let onClose: () -> Void
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                // Top image
-                ZStack(alignment: .topLeading) {
-                    Image(profile.picture)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(minWidth: 0, minHeight: 0)
-                        .aspectRatio(1, contentMode: .fit)
-                        .matchedGeometryEffect(
-                            id: "image_\(profile.id)",
-                            in: animation
-                        )
-                }
-                .toolbar {
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                    }
-                }
+        // No NavigationStack here on purpose: it lays its content out in its own pass,
+        // which lands a frame after the transition starts and makes the detail view snap
+        // into place instead of growing out of the card.
+        VStack(spacing: 0) {
+            Image(profile.picture)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(minWidth: 0, minHeight: 0)
+                .aspectRatio(1, contentMode: .fit)
+                .matchedGeometryEffect(
+                    id: "image_\(profile.id)",
+                    in: animation
+                )
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("\(profile.name)")
-                        .font(.system(.largeTitle, design: .rounded))
-                        .bold()
-                        .matchedGeometryEffect(
-                            id: "text_\(profile.id)",
-                            in: animation
-                        )
-                        .fixedSize(horizontal: true, vertical: true)
-                    Text(profile.bio)
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-                .padding(24)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(UIColor.systemBackground))
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(profile.name)")
+                    .font(.system(.largeTitle, design: .rounded))
+                    .bold()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .matchedGeometryEffect(
+                        id: "text_\(profile.id)",
+                        in: animation,
+                        properties: .position,
+                        anchor: .topLeading
+                    )
+                Text(profile.bio)
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                Spacer()
             }
-            .matchedGeometryEffect(id: "card_\(profile.id)", in: animation)
-            .ignoresSafeArea()
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .systemBackground))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .overlay(alignment: .topTrailing) {
+            Button(action: {
+                onClose()
+            }) {
+                Image(systemName: "xmark")
+                    .padding(4)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .padding()
         }
     }
 }

@@ -12,19 +12,25 @@ import SwiftUI
 struct ProfileCardView: View {
     let profile: Profile
     let animation: Namespace.ID
+    var isSelected: Bool = false
 
     var body: some View {
         VStack(alignment: .center, spacing: -8) {
             ZStack(alignment: .bottomLeading) {
-                Image(profile.picture)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(minWidth: 0, minHeight: 0)
-                    .aspectRatio(1, contentMode: .fit)
-                    .matchedGeometryEffect(
-                        id: "image_\(profile.id)",
-                        in: animation
-                    )
+                // While this profile is open we swap in an invisible copy that carries no
+                // matchedGeometryEffect. That removes the real one from the matched group
+                // (which is what drives the transition) without tearing down the grid cell,
+                // so the layout underneath never moves.
+                if isSelected {
+                    picture.hidden()
+                } else {
+                    picture
+                        .matchedGeometryEffect(
+                            id: "image_\(profile.id)",
+                            in: animation
+                        )
+                }
+
                 Rectangle()
                     .foregroundStyle(
                         LinearGradient(
@@ -33,15 +39,21 @@ struct ProfileCardView: View {
                             endPoint: .bottom
                         )
                     )
-                VStack(alignment: .leading) {
-                    Text("\(profile.name)")
-                        .font(.system(.title2, design: .rounded))
-                        .bold()
-                        .foregroundStyle(.white)
-                        .fixedSize(horizontal: true, vertical: true)
+
+                if isSelected {
+                    name.hidden()
+                } else {
+                    name
+                        // .position only, not the default .frame: the card uses .title2 and
+                        // the detail view uses .largeTitle, and matching frames across two
+                        // different font sizes squashes the text instead of moving it.
+                        .matchedGeometryEffect(
+                            id: "text_\(profile.id)",
+                            in: animation,
+                            properties: .position,
+                            anchor: .topLeading
+                        )
                 }
-                .padding(12)
-                .matchedGeometryEffect(id: "text_\(profile.id)", in: animation)
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .padding(8)
@@ -69,6 +81,23 @@ struct ProfileCardView: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.15), radius: 6, x: 3, y: 3)
+    }
+
+    private var picture: some View {
+        Image(profile.picture)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(minWidth: 0, minHeight: 0)
+            .aspectRatio(1, contentMode: .fit)
+    }
+
+    private var name: some View {
+        Text("\(profile.name)")
+            .font(.system(.title2, design: .rounded))
+            .bold()
+            .foregroundStyle(.white)
+            .fixedSize(horizontal: true, vertical: true)
+            .padding(12)
     }
 }
 
