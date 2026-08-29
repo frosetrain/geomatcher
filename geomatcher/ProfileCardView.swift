@@ -39,6 +39,10 @@ struct ProfileCardView: View {
                             endPoint: .bottom
                         )
                     )
+                    .matchedGeometryEffect(
+                        id: "black_\(profile.id)",
+                        in: animation
+                    )
 
                 if isSelected {
                     name.hidden()
@@ -96,25 +100,14 @@ struct ProfileCardView: View {
             .font(.system(.title2, design: .rounded))
             .bold()
             .foregroundStyle(.white)
-            .fixedSize(horizontal: true, vertical: true)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(12)
     }
 }
 
-// Provide a dummy namespace for previewing
-struct ProfileCardPreview: PreviewProvider {
-    struct Container: View {
-        @Namespace var dummyNamespace
-        var body: some View {
-            ProfileCardView(
-                profile: Profiles[3],
-                animation: dummyNamespace,
-            )
-            .frame(width: 200)
-            .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-    static var previews: some View {
-        Container()
-    }
+#Preview {
+    @Previewable @Namespace var namespace
+    ProfileCardView(profile: Profiles[4], animation: namespace)
+        .frame(width: 200)
+        .fixedSize(horizontal: false, vertical: true)
 }

@@ -28,33 +28,92 @@ struct ProfileDetailView: View {
                     id: "image_\(profile.id)",
                     in: animation
                 )
+                .background(.regularMaterial)
+                .overlay {
+                    Rectangle()
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.clear, .black],
+                                startPoint: .center,
+                                endPoint: .bottom
+                            )
+                        )
+                        .matchedGeometryEffect(
+                            id: "black_\(profile.id)",
+                            in: animation
+                        )
+                }
+                .overlay(alignment: .bottomLeading) {
+                    Text("\(profile.name)")
+                        .font(.system(.largeTitle, design: .rounded))
+                        .foregroundStyle(.white)
+                        .bold()
+                        .fixedSize(horizontal: false, vertical: true)
+                        .matchedGeometryEffect(
+                            id: "text_\(profile.id)",
+                            in: animation,
+                            properties: .position,
+                            anchor: .topLeading
+                        )
+                        .padding(24)
+                }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("\(profile.name)")
-                    .font(.system(.largeTitle, design: .rounded))
-                    .bold()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .matchedGeometryEffect(
-                        id: "text_\(profile.id)",
-                        in: animation,
-                        properties: .position,
-                        anchor: .topLeading
-                    )
-                Text(profile.bio)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                Spacer()
+            // A ScrollView, not a List: a List lays out in its own pass and would land a
+            // frame late, the same way NavigationStack does.
+            List {
+                row(
+                    "Age",
+                    value: "\(profile.age)",
+                    systemImage: "birthday.cake.fill"
+                )
+                row(
+                    "Followers",
+                    value: profile.followers,
+                    systemImage: "heart.fill"
+                )
+                row(
+                    "Gender",
+                    value: profile.gender,
+                    systemImage: "person.fill"
+                )
+                row(
+                    "Orientation",
+                    value: profile.orientation,
+                    systemImage: "heart.circle.fill"
+                )
+                row(
+                    "Likes",
+                    value: profile.likes,
+                    systemImage: "hand.thumbsup.fill"
+                )
+                row(
+                    "Dislikes",
+                    value: profile.dislikes,
+                    systemImage: "hand.thumbsdown.fill"
+                )
+                .background(
+                    Color(uiColor: .secondarySystemGroupedBackground),
+                    in: RoundedRectangle(cornerRadius: 12)
+                )
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Bio")
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    Text(profile.bio)
+                        .font(.body)
+                }
             }
-            .padding(24)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .systemBackground))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea()
         .overlay(alignment: .topTrailing) {
             Button(action: {
                 onClose()
             }) {
                 Image(systemName: "xmark")
+                    .imageScale(.large)
                     .padding(4)
             }
             .buttonStyle(.glass)
@@ -62,21 +121,21 @@ struct ProfileDetailView: View {
             .padding()
         }
     }
-}
 
-// Provide a dummy namespace for previewing
-struct ProfileDetailPreview: PreviewProvider {
-    struct Container: View {
-        @Namespace var dummyNamespace
-        var body: some View {
-            ProfileDetailView(
-                profile: Profiles[1],
-                animation: dummyNamespace,
-                onClose: {}
-            )
+    private func row(_ title: String, value: String, systemImage: String)
+        -> some View
+    {
+        LabeledContent {
+            Text(value)
+                .foregroundStyle(.secondary)
+        } label: {
+            Label(title, systemImage: systemImage)
+                .foregroundStyle(.primary)
         }
     }
-    static var previews: some View {
-        Container()
-    }
+}
+
+#Preview {
+    @Previewable @Namespace var namespace
+    ProfileDetailView(profile: Profiles[1], animation: namespace, onClose: {})
 }
